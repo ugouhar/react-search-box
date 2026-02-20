@@ -6,5 +6,12 @@ export const SearchBox = () => {
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  return <input value={searchQuery} onChange={handleSetSearchQuery} />;
+
+  return (
+    <input
+      value={searchQuery}
+      onChange={handleSetSearchQuery}
+      className="search-box"
+    />
+  );
 };

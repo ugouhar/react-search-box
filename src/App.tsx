@@ -1,3 +1,10 @@
+import { SearchBox } from "./components/searchbox";
+
 export default function App() {
-  return <h1>Hello World</h1>;
+  return (
+    <div className="app">
+      <h1>SearchBox App</h1>
+      <SearchBox />
+    </div>
+  );
 }
