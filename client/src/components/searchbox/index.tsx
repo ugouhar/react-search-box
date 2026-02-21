@@ -29,6 +29,7 @@ export const SearchBox = () => {
             setServedFromCache(true);
           } else {
             data = await searchApi(trimmedSearchQuery);
+            console.log(data);
             setServedFromCache(false);
           }
 

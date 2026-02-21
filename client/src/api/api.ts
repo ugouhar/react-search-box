@@ -20,7 +20,7 @@ const generateData = () => {
 generateData();
 
 let queriesCount = 0;
-export const searchApi = (query: string) => {
+export const searchApiMock = async (query: string) => {
   let failQuery = false;
   queriesCount++;
   if (queriesCount % 9 == 0) {
@@ -47,4 +47,10 @@ export const searchApi = (query: string) => {
       resolve(matchedResponse);
     }, 2000);
   });
+};
+
+export const searchApi = async (query: string) => {
+  const res = await fetch(`http://localhost:3000/data?query=${query}`);
+  const data = await res.json();
+  return data;
 };
