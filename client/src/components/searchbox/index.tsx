@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Item, searchApi } from "../../api/api";
 import { SearchResult } from "../searchresult";
 import { useLocalStorageCache } from "../../hooks/useLocalStorageCache";
@@ -18,6 +18,9 @@ export const SearchBox = () => {
   useEffect(() => {
     const trimmedSearchQuery = searchQuery.trimStart().trimEnd();
     let ignore = false;
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     const timer = setTimeout(() => {
       const fetchData = async () => {
         try {
@@ -28,7 +31,7 @@ export const SearchBox = () => {
             data = cachedResponse;
             setServedFromCache(true);
           } else {
-            data = await searchApi(trimmedSearchQuery);
+            data = await searchApi(trimmedSearchQuery, { signal });
             console.log(data);
             setServedFromCache(false);
           }
@@ -54,6 +57,7 @@ export const SearchBox = () => {
       setIsLoading(true);
       clearTimeout(timer);
       ignore = true;
+      controller.abort();
     };
   }, [searchQuery]);
 

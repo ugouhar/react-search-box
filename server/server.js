@@ -41,7 +41,7 @@ app.get("/data", (req, res) => {
     return false;
   });
 
-  res.json(matchedResponse);
+  setTimeout(() => res.json(matchedResponse), 2000);
 });
 
 app.listen("3000", () => {

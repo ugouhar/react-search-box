@@ -49,8 +49,10 @@ export const searchApiMock = async (query: string) => {
   });
 };
 
-export const searchApi = async (query: string) => {
-  const res = await fetch(`http://localhost:3000/data?query=${query}`);
+export const searchApi = async (query: string, { signal }) => {
+  const res = await fetch(`http://localhost:3000/data?query=${query}`, {
+    signal,
+  });
   const data = await res.json();
   return data;
 };
