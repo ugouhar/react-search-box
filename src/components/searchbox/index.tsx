@@ -12,23 +12,30 @@ export const SearchBox = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await searchApi(searchQuery);
-        setSearchResult(data);
-        setIsLoading(false);
-      } catch (err) {
-        console.log(err);
-        setSearchResult([]);
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    let ignore = false;
+    const timer = setTimeout(() => {
+      const fetchData = async () => {
+        try {
+          console.log("Fetching... ", searchQuery);
+          const data = await searchApi(searchQuery);
+          if (!ignore) {
+            setSearchResult(data);
+            setIsLoading(false);
+          }
+        } catch (err) {
+          console.log(err);
+          setSearchResult([]);
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, 200);
 
     return () => {
       setSearchResult([]);
       setIsLoading(true);
+      clearTimeout(timer);
+      ignore = true;
     };
   }, [searchQuery]);
 

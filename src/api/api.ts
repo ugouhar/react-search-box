@@ -23,10 +23,10 @@ let queriesCount = 0;
 export const searchApi = (query: string) => {
   let failQuery = false;
   queriesCount++;
-  if (queriesCount % 9 == 0) {
-    queriesCount = 0;
-    failQuery = true;
-  }
+  // if (queriesCount % 9 == 0) {
+  //   queriesCount = 0;
+  //   failQuery = true;
+  // }
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -45,6 +45,6 @@ export const searchApi = (query: string) => {
         return false;
       });
       resolve(matchedResponse);
-    }, 1000);
+    }, 500);
   });
 };
