@@ -12,15 +12,18 @@ export const SearchBox = () => {
   };
 
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       const data = await searchApi(searchQuery);
       setSearchResult(data);
       setIsLoading(false);
-      return () => {
-        setSearchResult([]);
-        setIsLoading(true);
-      };
-    })();
+    };
+
+    fetchData();
+
+    return () => {
+      setSearchResult([]);
+      setIsLoading(true);
+    };
   }, [searchQuery]);
 
   return (
