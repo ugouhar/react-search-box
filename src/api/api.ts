@@ -8,7 +8,7 @@ const data: Item[] = [];
 
 const generateData = () => {
   const N = 800;
-  for (let i = 0; i < N; i++) {
+  for (let i = 1; i <= N; i++) {
     data.push({
       id: `id${i}`,
       name: `name${i}`,
