@@ -29,8 +29,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/data", (req, res) => {
-  console.log(req.query.query);
-  res.json(data);
+  const query = req.query.query;
+  const matchedResponse = data.filter((item) => {
+    if (
+      item.id.includes(query) ||
+      item.name.includes(query) ||
+      item.email.includes(query)
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  res.json(matchedResponse);
 });
 
 app.listen("3000", () => {

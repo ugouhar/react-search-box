@@ -43,7 +43,7 @@ export const SearchBox = () => {
         } catch (err) {
           setSearchResult([]);
           setIsLoading(false);
-          setError(err);
+          setError(err.message);
         }
       };
       fetchData();
