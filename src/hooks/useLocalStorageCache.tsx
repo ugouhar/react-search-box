@@ -11,8 +11,6 @@ export const useLocalStorageCache = () => {
   };
 
   const setCachedData = (query: string, response: string[]) => {
-    if (!query) return;
-
     const cachedData = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_CACHE_KEY) || "{}",
     );

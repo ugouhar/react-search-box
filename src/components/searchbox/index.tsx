@@ -9,36 +9,41 @@ export const SearchBox = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [getCachedData, setCachedData] = useLocalStorageCache();
   const [servedFromCache, setServedFromCache] = useState(false);
+  const [error, setError] = useState();
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   useEffect(() => {
+    const trimmedSearchQuery = searchQuery.trimStart().trimEnd();
     let ignore = false;
     const timer = setTimeout(() => {
       const fetchData = async () => {
         try {
           let data = [];
-          const cachedResponse = getCachedData(searchQuery);
+          const cachedResponse = getCachedData(trimmedSearchQuery);
 
           if (cachedResponse) {
             data = cachedResponse;
             setServedFromCache(true);
           } else {
-            data = await searchApi(searchQuery);
+            data = await searchApi(trimmedSearchQuery);
             setServedFromCache(false);
           }
 
           if (!ignore) {
             setSearchResult(data);
             setIsLoading(false);
-            setCachedData(searchQuery, data);
+            setCachedData(trimmedSearchQuery, data);
           }
+
+          setError(null);
         } catch (err) {
           console.log(err);
           setSearchResult([]);
           setIsLoading(false);
+          setError(err.message);
         }
       };
       fetchData();
@@ -61,6 +66,8 @@ export const SearchBox = () => {
       />
       {isLoading ? (
         <h2>Loading...</h2>
+      ) : error ? (
+        <b>Error in fetching: {error}</b>
       ) : (
         <div>
           {servedFromCache ? (
