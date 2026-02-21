@@ -8,6 +8,7 @@ export const SearchBox = () => {
   const [searchResult, setSearchResult] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [getCachedData, setCachedData] = useLocalStorageCache();
+  const [servedFromCache, setServedFromCache] = useState(false);
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -18,8 +19,17 @@ export const SearchBox = () => {
     const timer = setTimeout(() => {
       const fetchData = async () => {
         try {
-          console.log("Fetching... ", searchQuery);
-          const data = await searchApi(searchQuery);
+          let data = [];
+          const cachedResponse = getCachedData(searchQuery);
+
+          if (cachedResponse) {
+            data = cachedResponse;
+            setServedFromCache(true);
+          } else {
+            data = await searchApi(searchQuery);
+            setServedFromCache(false);
+          }
+
           if (!ignore) {
             setSearchResult(data);
             setIsLoading(false);
@@ -32,7 +42,7 @@ export const SearchBox = () => {
         }
       };
       fetchData();
-    }, 500);
+    }, 200);
 
     return () => {
       setSearchResult([]);
@@ -52,7 +62,14 @@ export const SearchBox = () => {
       {isLoading ? (
         <h2>Loading...</h2>
       ) : (
-        <SearchResult searchResult={searchResult} />
+        <div>
+          {servedFromCache ? (
+            <i>Served from cache !!</i>
+          ) : (
+            <i>Served from network !!</i>
+          )}
+          <SearchResult searchResult={searchResult} />
+        </div>
       )}
     </>
   );

@@ -45,6 +45,6 @@ export const searchApi = (query: string) => {
         return false;
       });
       resolve(matchedResponse);
-    }, 500);
+    }, 2000);
   });
 };
