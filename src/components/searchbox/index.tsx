@@ -13,9 +13,15 @@ export const SearchBox = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await searchApi(searchQuery);
-      setSearchResult(data);
-      setIsLoading(false);
+      try {
+        const data = await searchApi(searchQuery);
+        setSearchResult(data);
+        setIsLoading(false);
+      } catch (err) {
+        console.log(err);
+        setSearchResult([]);
+        setIsLoading(false);
+      }
     };
 
     fetchData();

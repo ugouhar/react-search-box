@@ -19,9 +19,21 @@ const generateData = () => {
 
 generateData();
 
+let queriesCount = 0;
 export const searchApi = (query: string) => {
+  let failQuery = false;
+  queriesCount++;
+  if (queriesCount % 9 == 0) {
+    queriesCount = 0;
+    failQuery = true;
+  }
+
   return new Promise((resolve, reject) => {
     setTimeout(() => {
+      if (failQuery) {
+        reject("Error in fetching...");
+      }
+
       const matchedResponse = data.filter((item) => {
         if (
           item.id.includes(query) ||
