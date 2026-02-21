@@ -40,10 +40,9 @@ export const SearchBox = () => {
 
           setError(null);
         } catch (err) {
-          console.log(err);
           setSearchResult([]);
           setIsLoading(false);
-          setError(err.message);
+          setError(err);
         }
       };
       fetchData();
@@ -67,7 +66,9 @@ export const SearchBox = () => {
       {isLoading ? (
         <h2>Loading...</h2>
       ) : error ? (
-        <b>Error in fetching: {error}</b>
+        <div>
+          <i>Error in fetching: {error}</i>
+        </div>
       ) : (
         <div>
           {servedFromCache ? (

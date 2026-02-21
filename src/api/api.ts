@@ -23,15 +23,15 @@ let queriesCount = 0;
 export const searchApi = (query: string) => {
   let failQuery = false;
   queriesCount++;
-  // if (queriesCount % 9 == 0) {
-  //   queriesCount = 0;
-  //   failQuery = true;
-  // }
+  if (queriesCount % 9 == 0) {
+    queriesCount = 0;
+    failQuery = true;
+  }
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (failQuery) {
-        reject("Error in fetching...");
+        reject("Something went wrong !!");
       }
 
       const matchedResponse = data.filter((item) => {
