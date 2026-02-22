@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Item, searchApi } from "../../api/api";
 import { SearchResult } from "../searchresult";
 import { useCache } from "../../hooks/useCache";
@@ -12,13 +12,30 @@ export const SearchBox = () => {
   const [getCachedData, setCachedData] = useCache();
   const [source, setSource] = useState<ResultSource>(null);
   const [error, setError] = useState<string | null>(null);
-  const normalizedSearchQuery = searchQuery.toLowerCase().trim();
+
+  const normalizedSearchQuery = useMemo(
+    () => searchQuery.toLowerCase().trim(),
+    [searchQuery],
+  );
+
+  const debounceTimerRef = useRef(null);
+  const activeControllerRef = useRef<AbortController | null>(null);
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    if (activeControllerRef.current) {
+      activeControllerRef.current.abort();
+      activeControllerRef.current = null;
+    }
+
     if (!normalizedSearchQuery) {
       setError(null);
       setSource(null);
@@ -76,6 +93,35 @@ export const SearchBox = () => {
     };
   }, [getCachedData, normalizedSearchQuery, setCachedData]);
 
+  const renderBody = () => {
+    if (!normalizedSearchQuery) {
+      return null;
+    }
+
+    if (isLoading) {
+      return <h2>Loading...</h2>;
+    }
+
+    if (error) {
+      return (
+        <div>
+          <i>Error in fetching: {error}</i>
+        </div>
+      );
+    }
+
+    if (!source) {
+      return null;
+    }
+
+    return (
+      <div>
+        <i>Served from {source}</i>
+        <SearchResult searchResult={searchResult} />
+      </div>
+    );
+  };
+
   return (
     <>
       <input
@@ -85,27 +131,7 @@ export const SearchBox = () => {
         placeholder="Search users"
         aria-label="Search users"
       />
-      {normalizedSearchQuery && (
-        <>
-          {source === "cache" ? (
-            <div>
-              <i>Served from cache</i>
-              <SearchResult searchResult={searchResult} />
-            </div>
-          ) : isLoading ? (
-            <h2>Loading...</h2>
-          ) : error ? (
-            <div>
-              <i>Error in fetching: {error}</i>
-            </div>
-          ) : source === "network" ? (
-            <div>
-              <i>Served from network</i>
-              <SearchResult searchResult={searchResult} />
-            </div>
-          ) : null}
-        </>
-      )}
+      {renderBody()}
     </>
   );
 };
