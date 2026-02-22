@@ -6,17 +6,20 @@ import { useCache } from "../../hooks/useCache";
 export const SearchBox = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResult, setSearchResult] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [getCachedData, setCachedData] = useCache();
   const [servedFromCache, setServedFromCache] = useState(false);
   const [error, setError] = useState();
+  const trimmedSearchQuery = searchQuery.trimStart().trimEnd();
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   useEffect(() => {
-    const trimmedSearchQuery = searchQuery.trimStart().trimEnd();
+    if (!trimmedSearchQuery) {
+      return;
+    }
     let ignore = false;
     const controller = new AbortController();
     const signal = controller.signal;
@@ -68,23 +71,28 @@ export const SearchBox = () => {
         value={searchQuery}
         onChange={handleSetSearchQuery}
         className="search-box"
+        placeholder={trimmedSearchQuery ? "" : "Search users"}
       />
-      {servedFromCache ? (
-        <div>
-          <i>Served from cache !!</i>
-          <SearchResult searchResult={searchResult} />
-        </div>
-      ) : isLoading ? (
-        <h2>Loading...</h2>
-      ) : error ? (
-        <div>
-          <i>Error in fetching: {error}</i>
-        </div>
-      ) : (
-        <div>
-          <i>Served from network !!</i>
-          <SearchResult searchResult={searchResult} />
-        </div>
+      {trimmedSearchQuery && (
+        <>
+          {servedFromCache ? (
+            <div>
+              <i>Served from cache !!</i>
+              <SearchResult searchResult={searchResult} />
+            </div>
+          ) : isLoading ? (
+            <h2>Loading...</h2>
+          ) : error ? (
+            <div>
+              <i>Error in fetching: {error}</i>
+            </div>
+          ) : (
+            <div>
+              <i>Served from network !!</i>
+              <SearchResult searchResult={searchResult} />
+            </div>
+          )}
+        </>
       )}
     </>
   );
