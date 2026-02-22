@@ -74,7 +74,7 @@ export const SearchBox = () => {
       ignore = true;
       controller.abort();
     };
-  }, [normalizedSearchQuery]);
+  }, [getCachedData, normalizedSearchQuery, setCachedData]);
 
   return (
     <>
