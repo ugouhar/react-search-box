@@ -20,37 +20,39 @@ export const SearchBox = () => {
     let ignore = false;
     const controller = new AbortController();
     const signal = controller.signal;
+    let data = [];
+    let timer;
+    const cachedResponse = getCachedData(trimmedSearchQuery);
 
-    const timer = setTimeout(() => {
-      const fetchData = async () => {
-        try {
-          let data = [];
-          const cachedResponse = getCachedData(trimmedSearchQuery);
-
-          if (cachedResponse) {
-            data = cachedResponse;
-            setServedFromCache(true);
-          } else {
+    if (cachedResponse) {
+      data = cachedResponse;
+      setServedFromCache(true);
+      setSearchResult(data);
+    } else {
+      setServedFromCache(false);
+      timer = setTimeout(() => {
+        const fetchData = async () => {
+          try {
             data = await searchApi(trimmedSearchQuery, { signal });
-            console.log(data);
-            setServedFromCache(false);
-          }
 
-          if (!ignore) {
-            setSearchResult(data);
-            setIsLoading(false);
-            setCachedData(trimmedSearchQuery, data);
-          }
+            if (!ignore) {
+              setSearchResult(data);
+              setIsLoading(false);
+              setCachedData(trimmedSearchQuery, data);
+            }
 
-          setError(null);
-        } catch (err) {
-          setSearchResult([]);
-          setIsLoading(false);
-          setError(err.message);
-        }
-      };
-      fetchData();
-    }, 200);
+            setError(null);
+          } catch (err) {
+            if (err.name != "AbortError") {
+              setSearchResult([]);
+              setIsLoading(false);
+              setError(err.message);
+            }
+          }
+        };
+        fetchData();
+      }, 500);
+    }
 
     return () => {
       setSearchResult([]);
@@ -68,7 +70,12 @@ export const SearchBox = () => {
         onChange={handleSetSearchQuery}
         className="search-box"
       />
-      {isLoading ? (
+      {servedFromCache ? (
+        <div>
+          <i>Served from cache !!</i>
+          <SearchResult searchResult={searchResult} />
+        </div>
+      ) : isLoading ? (
         <h2>Loading...</h2>
       ) : error ? (
         <div>
@@ -76,11 +83,7 @@ export const SearchBox = () => {
         </div>
       ) : (
         <div>
-          {servedFromCache ? (
-            <i>Served from cache !!</i>
-          ) : (
-            <i>Served from network !!</i>
-          )}
+          <i>Served from network !!</i>
           <SearchResult searchResult={searchResult} />
         </div>
       )}
