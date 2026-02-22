@@ -115,33 +115,45 @@ export const SearchBox = () => {
     };
   }, [getCachedData, normalizedSearchQuery, setCachedData]);
 
-  const renderBody = () => {
-    if (!normalizedSearchQuery) {
-      return null;
-    }
+  const renderLoading = () => {
+    return <h2>Loading...</h2>;
+  };
 
-    if (isLoading) {
-      return <h2>Loading...</h2>;
-    }
+  const renderError = () => {
+    return (
+      <div>
+        <i>Error in fetching: {error}</i>
+      </div>
+    );
+  };
 
-    if (error) {
-      return (
-        <div>
-          <i>Error in fetching: {error}</i>
-        </div>
-      );
-    }
-
-    if (!source) {
-      return null;
-    }
-
+  const renderSearchResult = () => {
     return (
       <div>
         <i>Served from {source}</i>
         <SearchResult searchResult={searchResult} />
       </div>
     );
+  };
+
+  const renderBody = () => {
+    if (!normalizedSearchQuery) {
+      return null;
+    }
+
+    if (isLoading) {
+      return renderLoading();
+    }
+
+    if (error) {
+      return renderError();
+    }
+
+    if (!source) {
+      return null;
+    }
+
+    return renderSearchResult();
   };
 
   return (
