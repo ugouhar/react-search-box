@@ -36,16 +36,16 @@ export const SearchBox = () => {
     let timer;
     const cachedResponse = getCachedData(normalizedSearchQuery);
 
-    if (cachedResponse) {
+    if (cachedResponse !== undefined) {
       data = cachedResponse;
       setSource("cache");
       setError(null);
       setIsLoading(false);
       setSearchResult(data);
     } else {
-      setIsLoading(true);
       setSource(null);
       timer = setTimeout(() => {
+        setIsLoading(true);
         const fetchData = async () => {
           try {
             data = await searchApi(normalizedSearchQuery, { signal });
@@ -58,7 +58,7 @@ export const SearchBox = () => {
               setSource("network");
             }
           } catch (err) {
-            if (!ignore && err.name != "AbortError") {
+            if (!ignore && err.name !== "AbortError") {
               setSearchResult([]);
               setIsLoading(false);
               setError(err.message);
@@ -75,7 +75,13 @@ export const SearchBox = () => {
       ignore = true;
       controller.abort();
     };
-  }, [getCachedData, normalizedSearchQuery, searchQuery, setCachedData]);
+  }, [
+    getCachedData,
+    normalizedSearchQuery,
+    searchQuery,
+    searchResult.length,
+    setCachedData,
+  ]);
 
   return (
     <>
@@ -84,6 +90,7 @@ export const SearchBox = () => {
         onChange={handleSetSearchQuery}
         className="search-box"
         placeholder="Search users"
+        aria-label="Search users"
       />
       {normalizedSearchQuery && (
         <>
