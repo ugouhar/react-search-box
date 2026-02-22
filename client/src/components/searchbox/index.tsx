@@ -10,14 +10,14 @@ export const SearchBox = () => {
   const [getCachedData, setCachedData] = useCache();
   const [servedFromCache, setServedFromCache] = useState(false);
   const [error, setError] = useState();
-  const trimmedSearchQuery = searchQuery.trimStart().trimEnd();
+  const normalizedSearchQuery = searchQuery.toLowerCase().trimStart().trimEnd();
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   useEffect(() => {
-    if (!trimmedSearchQuery) {
+    if (!normalizedSearchQuery) {
       return;
     }
     let ignore = false;
@@ -25,7 +25,7 @@ export const SearchBox = () => {
     const signal = controller.signal;
     let data = [];
     let timer;
-    const cachedResponse = getCachedData(trimmedSearchQuery);
+    const cachedResponse = getCachedData(normalizedSearchQuery);
 
     if (cachedResponse) {
       data = cachedResponse;
@@ -37,15 +37,14 @@ export const SearchBox = () => {
       timer = setTimeout(() => {
         const fetchData = async () => {
           try {
-            data = await searchApi(trimmedSearchQuery, { signal });
+            data = await searchApi(normalizedSearchQuery, { signal });
 
             if (!ignore) {
               setSearchResult(data);
               setIsLoading(false);
-              setCachedData(trimmedSearchQuery, data);
+              setCachedData(normalizedSearchQuery, data);
+              setError(null);
             }
-
-            setError(null);
           } catch (err) {
             if (err.name != "AbortError") {
               setSearchResult([]);
@@ -71,9 +70,9 @@ export const SearchBox = () => {
         value={searchQuery}
         onChange={handleSetSearchQuery}
         className="search-box"
-        placeholder={trimmedSearchQuery ? "" : "Search users"}
+        placeholder={normalizedSearchQuery ? "" : "Search users"}
       />
-      {trimmedSearchQuery && (
+      {normalizedSearchQuery && (
         <>
           {servedFromCache ? (
             <div>
