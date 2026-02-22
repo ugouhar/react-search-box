@@ -11,7 +11,7 @@ export const SearchBox = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [getCachedData, setCachedData] = useCache();
   const [source, setSource] = useState<ResultSource>(null);
-  const [error, setError] = useState();
+  const [error, setError] = useState<string | null>(null);
   const normalizedSearchQuery = searchQuery.toLowerCase().trim();
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
@@ -30,8 +30,8 @@ export const SearchBox = () => {
     let ignore = false;
     const controller = new AbortController();
     const signal = controller.signal;
-    let data = [];
-    let timer;
+    let data: Item[] = [];
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const cachedResponse = getCachedData(normalizedSearchQuery);
 
     if (cachedResponse !== undefined) {
@@ -56,8 +56,8 @@ export const SearchBox = () => {
               setError(null);
               setSource("network");
             }
-          } catch (err) {
-            if (!ignore && err.name !== "AbortError") {
+          } catch (err: unknown) {
+            if (!ignore && err instanceof Error && err.name !== "AbortError") {
               setSearchResult([]);
               setIsLoading(false);
               setError(err.message);
