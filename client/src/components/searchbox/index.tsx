@@ -12,7 +12,7 @@ export const SearchBox = () => {
   const [getCachedData, setCachedData] = useCache();
   const [source, setSource] = useState<ResultSource>(null);
   const [error, setError] = useState();
-  const normalizedSearchQuery = searchQuery.toLowerCase().trimStart().trimEnd();
+  const normalizedSearchQuery = searchQuery.toLowerCase().trim();
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -22,9 +22,7 @@ export const SearchBox = () => {
     if (!normalizedSearchQuery) {
       setError(null);
       setSource(null);
-      if (searchResult.length > 0) {
-        setSearchResult([]);
-      }
+      setSearchResult([]);
       setIsLoading(false);
 
       return;
@@ -44,10 +42,11 @@ export const SearchBox = () => {
       setSearchResult(data);
     } else {
       setSource(null);
+      setIsLoading(false);
       timer = setTimeout(() => {
-        setIsLoading(true);
         const fetchData = async () => {
           try {
+            setIsLoading(true);
             data = await searchApi(normalizedSearchQuery, { signal });
 
             if (!ignore) {
@@ -75,13 +74,7 @@ export const SearchBox = () => {
       ignore = true;
       controller.abort();
     };
-  }, [
-    getCachedData,
-    normalizedSearchQuery,
-    searchQuery,
-    searchResult.length,
-    setCachedData,
-  ]);
+  }, [normalizedSearchQuery]);
 
   return (
     <>
