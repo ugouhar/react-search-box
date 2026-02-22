@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Item, searchApi } from "../../api/api";
 import { SearchResult } from "../searchresult";
-import { useLocalStorageCache } from "../../hooks/useLocalStorageCache";
+import { useCache } from "../../hooks/useCache";
 
 export const SearchBox = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResult, setSearchResult] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [getCachedData, setCachedData] = useLocalStorageCache();
+  const [getCachedData, setCachedData] = useCache();
   const [servedFromCache, setServedFromCache] = useState(false);
   const [error, setError] = useState();
 
@@ -29,6 +29,7 @@ export const SearchBox = () => {
       setServedFromCache(true);
       setSearchResult(data);
     } else {
+      setIsLoading(true);
       setServedFromCache(false);
       timer = setTimeout(() => {
         const fetchData = async () => {
@@ -55,8 +56,6 @@ export const SearchBox = () => {
     }
 
     return () => {
-      setSearchResult([]);
-      setIsLoading(true);
       clearTimeout(timer);
       ignore = true;
       controller.abort();
