@@ -18,6 +18,11 @@ export const SearchBox = () => {
 
   useEffect(() => {
     if (!normalizedSearchQuery) {
+      setError(null);
+      setServedFromCache(false);
+      setSearchResult([]);
+      setIsLoading(false);
+
       return;
     }
     let ignore = false;
@@ -46,7 +51,7 @@ export const SearchBox = () => {
               setError(null);
             }
           } catch (err) {
-            if (err.name != "AbortError") {
+            if (!ignore && err.name != "AbortError") {
               setSearchResult([]);
               setIsLoading(false);
               setError(err.message);
