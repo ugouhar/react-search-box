@@ -3,12 +3,14 @@ import { Item, searchApi } from "../../api/api";
 import { SearchResult } from "../searchresult";
 import { useCache } from "../../hooks/useCache";
 
+type ResultSource = "cache" | "network" | null;
+
 export const SearchBox = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResult, setSearchResult] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [getCachedData, setCachedData] = useCache();
-  const [servedFromCache, setServedFromCache] = useState(false);
+  const [source, setSource] = useState<ResultSource>(null);
   const [error, setError] = useState();
   const normalizedSearchQuery = searchQuery.toLowerCase().trimStart().trimEnd();
 
@@ -19,8 +21,10 @@ export const SearchBox = () => {
   useEffect(() => {
     if (!normalizedSearchQuery) {
       setError(null);
-      setServedFromCache(false);
-      setSearchResult([]);
+      setSource(null);
+      if (searchResult.length > 0) {
+        setSearchResult([]);
+      }
       setIsLoading(false);
 
       return;
@@ -34,11 +38,13 @@ export const SearchBox = () => {
 
     if (cachedResponse) {
       data = cachedResponse;
-      setServedFromCache(true);
+      setSource("cache");
+      setError(null);
+      setIsLoading(false);
       setSearchResult(data);
     } else {
       setIsLoading(true);
-      setServedFromCache(false);
+      setSource(null);
       timer = setTimeout(() => {
         const fetchData = async () => {
           try {
@@ -49,12 +55,14 @@ export const SearchBox = () => {
               setIsLoading(false);
               setCachedData(normalizedSearchQuery, data);
               setError(null);
+              setSource("network");
             }
           } catch (err) {
             if (!ignore && err.name != "AbortError") {
               setSearchResult([]);
               setIsLoading(false);
               setError(err.message);
+              setSource(null);
             }
           }
         };
@@ -67,7 +75,7 @@ export const SearchBox = () => {
       ignore = true;
       controller.abort();
     };
-  }, [searchQuery]);
+  }, [getCachedData, normalizedSearchQuery, searchQuery, setCachedData]);
 
   return (
     <>
@@ -75,13 +83,13 @@ export const SearchBox = () => {
         value={searchQuery}
         onChange={handleSetSearchQuery}
         className="search-box"
-        placeholder={normalizedSearchQuery ? "" : "Search users"}
+        placeholder="Search users"
       />
       {normalizedSearchQuery && (
         <>
-          {servedFromCache ? (
+          {source === "cache" ? (
             <div>
-              <i>Served from cache !!</i>
+              <i>Served from cache</i>
               <SearchResult searchResult={searchResult} />
             </div>
           ) : isLoading ? (
@@ -90,12 +98,12 @@ export const SearchBox = () => {
             <div>
               <i>Error in fetching: {error}</i>
             </div>
-          ) : (
+          ) : source === "network" ? (
             <div>
-              <i>Served from network !!</i>
+              <i>Served from network</i>
               <SearchResult searchResult={searchResult} />
             </div>
-          )}
+          ) : null}
         </>
       )}
     </>
