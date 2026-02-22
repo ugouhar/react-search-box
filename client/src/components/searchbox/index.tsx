@@ -18,7 +18,7 @@ export const SearchBox = () => {
     [searchQuery],
   );
 
-  const debounceTimerRef = useRef(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeControllerRef = useRef<AbortController | null>(null);
 
   const handleSetSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +26,8 @@ export const SearchBox = () => {
   };
 
   useEffect(() => {
+    let ignore = false;
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -44,52 +46,72 @@ export const SearchBox = () => {
 
       return;
     }
-    let ignore = false;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    let data: Item[] = [];
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const cachedResponse = getCachedData(normalizedSearchQuery);
 
+    const cachedResponse = getCachedData(normalizedSearchQuery);
     if (cachedResponse !== undefined) {
-      data = cachedResponse;
-      setSource("cache");
+      setSearchResult(cachedResponse);
       setError(null);
       setIsLoading(false);
-      setSearchResult(data);
-    } else {
-      setSource(null);
-      setIsLoading(false);
-      timer = setTimeout(() => {
-        const fetchData = async () => {
-          try {
-            setIsLoading(true);
-            data = await searchApi(normalizedSearchQuery, { signal });
-
-            if (!ignore) {
-              setSearchResult(data);
-              setIsLoading(false);
-              setCachedData(normalizedSearchQuery, data);
-              setError(null);
-              setSource("network");
-            }
-          } catch (err: unknown) {
-            if (!ignore && err instanceof Error && err.name !== "AbortError") {
-              setSearchResult([]);
-              setIsLoading(false);
-              setError(err.message);
-              setSource(null);
-            }
-          }
-        };
-        fetchData();
-      }, 500);
+      setSource("cache");
+      return;
     }
 
+    setSource(null);
+    setError(null);
+    setIsLoading(false);
+
+    debounceTimerRef.current = setTimeout(() => {
+      const controller = new AbortController();
+      activeControllerRef.current = controller;
+      setIsLoading(true);
+
+      const fetchData = async () => {
+        try {
+          const response = (await searchApi(normalizedSearchQuery, {
+            signal: controller.signal,
+          })) as Item[];
+
+          if (ignore) {
+            return;
+          }
+
+          setSearchResult(response);
+          setCachedData(normalizedSearchQuery, response);
+          setError(null);
+          setSource("network");
+        } catch (err: unknown) {
+          if (ignore) return;
+
+          if (err instanceof Error && err.name === "AbortError") {
+            return;
+          }
+
+          setSearchResult([]);
+          setSource(null);
+          setError(err instanceof Error ? err.message : "Unknown error");
+        } finally {
+          if (!ignore) {
+            setIsLoading(false);
+          }
+          if (activeControllerRef.current === controller) {
+            activeControllerRef.current = null;
+          }
+        }
+      };
+      fetchData();
+    }, 500);
+
     return () => {
-      clearTimeout(timer);
       ignore = true;
-      controller.abort();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      if (activeControllerRef.current) {
+        activeControllerRef.current.abort();
+        activeControllerRef.current = null;
+      }
     };
   }, [getCachedData, normalizedSearchQuery, setCachedData]);
 
