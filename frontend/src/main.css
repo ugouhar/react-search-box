@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  background: linear-gradient(160deg, #f3f8ff 0%, #eef7f2 100%);
+  color: #1f2937;
+}
+
+#root {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.app-shell {
+  width: min(720px, 100%);
+}
+
+.title {
+  margin: 0 0 16px;
+  font-size: clamp(1.4rem, 1.2rem + 1vw, 2rem);
+}
+
+.search-panel {
+  background: #ffffff;
+  border: 1px solid #dce7f5;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(13, 33, 60, 0.08);
+}
+
+.label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #c5d3e6;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #2f76ff;
+  box-shadow: 0 0 0 3px rgba(47, 118, 255, 0.18);
+}
+
+.state-container {
+  margin-top: 14px;
+}
+
+.hint,
+.loading,
+.empty-state {
+  margin: 0;
+  color: #4b5563;
+}
+
+.error {
+  margin: 0;
+  color: #b91c1c;
+}
+
+.source {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #2563eb;
+}
+
+.results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.result-item {
+  border: 1px solid #e1e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.result-name {
+  font-weight: 600;
+}
+
+.result-email {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
