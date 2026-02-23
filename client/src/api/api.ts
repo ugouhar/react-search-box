@@ -25,37 +25,43 @@ const isItem = (value: unknown): value is Item => {
   );
 };
 
-const inflightByQuery = new Map();
+const inflightByQuery = new Map<string, Promise<Item[]>>();
 
 export const searchApi = async (
   query: string,
   { signal }: SearchApiOptions,
 ): Promise<Item[]> => {
-  const inflight = inflightByQuery.get(query);
+  const encodedQuery = encodeURIComponent(query);
 
+  let inflight = inflightByQuery.get(encodedQuery);
   if (inflight) {
     return inflight;
   }
 
-  const p = fetch(`${API_BASE_URL}/data?query=${query}`, {
-    signal,
-  }).finally(() => {
-    inflightByQuery.delete(query);
-  });
+  const fetchResult = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/data?query=${encodedQuery}`, {
+        signal,
+      });
 
-  const res = await p;
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+      }
 
-  if (res.ok) {
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error("Invalid response shape");
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid response shape");
+      }
+
+      return data.filter(isItem);
+    } finally {
+      inflightByQuery.delete(encodedQuery);
     }
+  };
 
-    inflightByQuery.set(query, p);
+  inflight = fetchResult();
+  inflightByQuery.set(encodedQuery, inflight);
 
-    return data.filter(isItem);
-  }
-
-  throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+  return inflight;
 };
