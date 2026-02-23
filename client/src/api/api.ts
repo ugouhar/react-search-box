@@ -8,12 +8,14 @@ type SearchApiOptions = {
   signal: AbortSignal;
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
+
 export const searchApi = async (
   query: string,
   { signal }: SearchApiOptions,
 ): Promise<Item[]> => {
   const encodedQuery = encodeURIComponent(query);
-  const res = await fetch(`http://localhost:3000/data?query=${encodedQuery}`, {
+  const res = await fetch(`${API_BASE_URL}/data?query=${encodedQuery}`, {
     signal,
   });
   if (res.ok) {
