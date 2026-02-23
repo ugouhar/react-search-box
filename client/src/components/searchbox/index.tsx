@@ -48,7 +48,7 @@ export const SearchBox = () => {
     }
 
     const cachedResponse = getCachedData(normalizedSearchQuery);
-    if (cachedResponse !== undefined) {
+    if (cachedResponse !== null) {
       setSearchResult(cachedResponse);
       setError(null);
       setIsLoading(false);

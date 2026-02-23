@@ -13,12 +13,12 @@ export const useCache = () => {
   const getCachedData = useCallback((query: string) => {
     const entry = cacheMap.get(query);
     if (!entry) {
-      return undefined;
+      return null;
     }
 
     if (Date.now() > entry.expiresAt) {
       cacheMap.delete(query);
-      return undefined;
+      return null;
     }
 
     return [...entry.data];
