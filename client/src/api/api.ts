@@ -17,9 +17,22 @@ export const searchApi = async (
     signal,
   });
   if (res.ok) {
-    const data = (await res.json()) as Item[];
-    return data;
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid response shape");
+    }
+
+    const validatedData: Item[] = data.map((item) => {
+      const updatedItem = { ...item };
+      if (!updatedItem.id) updatedItem.id = "";
+      if (!updatedItem.name) updatedItem.name = "";
+      if (!updatedItem.email) updatedItem.email = "";
+      return updatedItem;
+    });
+
+    return validatedData;
   }
 
-  throw new Error("Fetch error");
+  throw new Error(`Request failed: ${res.status} ${res.statusText}`);
 };
