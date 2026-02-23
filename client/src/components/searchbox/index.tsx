@@ -67,9 +67,9 @@ export const SearchBox = () => {
 
       const fetchData = async () => {
         try {
-          const response = (await searchApi(normalizedSearchQuery, {
+          const response = await searchApi(normalizedSearchQuery, {
             signal: controller.signal,
-          })) as Item[];
+          });
 
           if (ignore) {
             return;
